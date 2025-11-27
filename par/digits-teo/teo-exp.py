@@ -2,98 +2,51 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# ================================
-# CONFIGURACIÓN
-# ================================
-CSV_FILE = "knn_results.csv"   # <-- Cambia si tu archivo se llama distinto
-N_VALUES = [200, 500, 1000, 1500, 1797]
+CSV_PAR = "../digits/knn_results.csv"
+CSV_SEQ = "../../sec/knn_sequential.csv"
 
-# ================================
-# MODELO TEÓRICO NORMALIZADO
-# ================================
-def T_teor_norm(p, lam, mu):
-    """
-    Modelo teórico normalizado:
-    T_norm(p) = 1/p + lambda * p + mu * log2(p)
-    """
-    return 1/p + lam * p + mu * np.log2(p)
+# Cargar datos
+dfp = pd.read_csv(CSV_PAR)
+dfs = pd.read_csv(CSV_SEQ)
 
-
-# ================================
-# CARGAR DATOS
-# ================================
-df = pd.read_csv(CSV_FILE)
-
-# Diccionarios donde guardaremos cada λ y μ
-lambda_params = {}
-mu_params = {}
-
-print("\n===== AJUSTE DE CONSTANTES λ y μ =====")
-for N in N_VALUES:
-
-    # Filtrar por tamaño del dataset
-    sub = df[df["n_total"] == N].copy().sort_values("p")
-
-    p = sub["p"].to_numpy(float)
-    T_exp = sub["time_compute"].to_numpy(float)  # Solo computación
-
-    # Normalización experimental con T(1)
-    T1 = T_exp[0]
-    T_norm_exp = T_exp / T1
-
-    # Construir variables para el ajuste lineal:
-    # y = T_norm - 1/p
-    y = T_norm_exp - 1/p
-
-    # X = [p, log2(p)]
-    X = np.column_stack((p, np.log2(p)))
-
-    # Resolver mínimos cuadrados
-    theta, _, _, _ = np.linalg.lstsq(X, y, rcond=None)
-    lam, mu = theta
-
-    # Guardar resultados
-    lambda_params[N] = lam
-    mu_params[N] = mu
-
-    print(f"N={N}:  lambda={lam:.6e}   mu={mu:.6e}")
-
-
-# ================================
-# GRAFIQUE: TEÓRICO VS EXPERIMENTAL
-# ================================
-print("\n===== GENERANDO GRÁFICAS =====")
+N_VALUES = sorted(dfp["n_total"].unique())
 
 for N in N_VALUES:
+    sub_p = dfp[dfp["n_total"] == N].copy().sort_values("p")
+    sub_s = dfs[dfs["n_total"] == N].copy()
 
-    sub = df[df["n_total"] == N].copy().sort_values("p")
+    p = sub_p["p"].to_numpy(float)
+    T_exp = sub_p["time_compute"].to_numpy(float)
 
-    p = sub["p"].to_numpy(float)
-    T_exp = sub["time_compute"].to_numpy(float)
-    T_norm_exp = T_exp / T_exp[0]
+    ntr = sub_p["n_tr"].iloc[0]
+    nte = sub_p["n_test"].iloc[0]
 
-    lam = lambda_params[N]
-    mu = mu_params[N]
+    # Construimos:
+    # T(p) = a*(ntr*nte)/p + b*p + c*log2(p)
+    X = np.column_stack((
+        (ntr * nte) / p,
+        p,
+        np.log2(p)
+    ))
 
-    # Evaluar modelo teórico ajustado
-    T_norm_teor = T_teor_norm(p, lam, mu)
+    # Ajustar parámetros a,b,c
+    theta, _, _, _ = np.linalg.lstsq(X, T_exp, rcond=None)
+    a, b, c = theta
 
-    # --- GRAFICAR ---
+    print(f"N={N}: α={a:.3e}  β={b:.3e}  γ={c:.3e}")
+
+    # Evaluar modelo
+    T_teor = X @ theta
+
+    # ---- Gráfica ----
     plt.figure(figsize=(10,6))
-    plt.plot(p, T_norm_exp, marker='o', label="Experimental normalizado")
-    plt.plot(p, T_norm_teor, marker='s', label="Teórico ajustado")
+    plt.plot(p, T_exp, marker="o", label="Experimental")
+    plt.plot(p, T_teor, marker="s", label="Teórico ajustado")
 
-    plt.xlabel("Número de procesos p")
-    plt.ylabel("Tiempo normalizado")
-    plt.title(f"Comparación Teórico vs Experimental (N={N})")
+    plt.xlabel("p")
+    plt.ylabel("Tiempo de cómputo (s)")
+    plt.title(f"Comparación teórico vs experimental (N={N})")
     plt.grid(True)
     plt.legend()
-
-    filename = f"teorico_vs_experimental_N{N}.png"
-    plt.savefig(filename, dpi=300)
+    plt.savefig(f"teo_vs_exp_N{N}.png", dpi=300)
     plt.close()
-
-    print(f"Gráfico guardado como: {filename}")
-
-
-print("\n===== PROCESO COMPLETADO =====")

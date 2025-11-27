@@ -10,7 +10,7 @@ N_VALUES = [200, 500, 1000, 1500, 1797]
 for N in N_VALUES:
     # filtrar por n_total
     sub = df[df["n_total"] == N].copy()
-    sub = sub.sort_values("p")   # asegurarnos de que p va en orden
+    sub = sub.sort_values("p")   
     
     p = sub["p"].to_numpy(dtype=float)
     T_exp = sub["time_total"].to_numpy(dtype=float)
