@@ -1,4 +1,4 @@
-#  NN Paralelo con MPI 
+#  KNN Paralelo con MPI 
 
 Este proyecto implementa y evalúa una versión paralela del algoritmo
 *k*-Nearest Neighbors utilizando `mpi4py` en Python. El trabajo forma parte del
@@ -9,7 +9,7 @@ curso Computación Paralela y Distribuida (UTEC).
 
 ---
 
-## 🎯 Objetivo
+## Objetivo
 
 Acelerar el proceso de clasificación mediante paralelización del cálculo de
 distancias entre muestras. Se mide:
@@ -21,7 +21,7 @@ distancias entre muestras. Se mide:
 
 ---
 
-## 🧠 Dataset utilizado
+## Dataset utilizado
 
 - Dataset: `digits` — scikit-learn
 - Tamaños probados: `N = 200, 500, 1000, 1500, 1797`
@@ -32,14 +32,14 @@ distancias entre muestras. Se mide:
 
 ---
 
-## ⚙️ Ejecución
+## Ejecución
 
-### ▶️ Versión secuencial
+### Versión secuencial
 ```bash
 python3 sec/knn_digits_sec.py
 ```
 
-### 🚀 Versión paralela (MPI)
+### Versión paralela (MPI)
 
 ```bash
 mpiexec --oversubscribe -n 32 \
@@ -58,11 +58,12 @@ mpiexec --oversubscribe -n 32 \
 
 ---
 
-### 📌 Conclusiones principales
+### Conclusiones principales
 
-- La operación dominante del algoritmo (**cálculo de distancias**) es altamente paralelizable.
-- Para **N = 1797**, el tiempo mínimo se logra con **p ≈ 32 procesos**.
-- El **accuracy** del modelo no se ve afectado por la paralelización.
-- La eficiencia disminuye con valores altos de `p` debido a:
-  - overhead de comunicación MPI,
-  - sobredistribución del trabajo (muy pocos datos por proceso).
+- El cálculo de distancias de KNN es altamente paralelizable y se logró una mejora significativa en rendimiento para tamaños de datos medianos y grandes.
+- Para el dataset completo `digits` (N = 1797), el mejor tiempo de ejecución se obtuvo alrededor de **p ≈ 32 procesos**, con speedup cercano a 12x y buena eficiencia.
+- El **accuracy** se mantuvo constante para todos los valores de `p`, lo que demuestra que la paralelización no altera el resultado del clasificador respecto a la versión secuencial.
+- La eficiencia y el rendimiento disminuyen a partir de **p ≥ 64**, debido al incremento del costo de comunicación y la menor carga de trabajo por proceso.
+- Para tamaños pequeños (N = 200, 500), la paralelización **no es recomendable**, ya que la sobrecarga supera al cómputo útil.
+- El algoritmo muestra **buena escalabilidad** siempre que el tamaño del problema crezca proporcionalmente al número de procesos (aprox. N = Θ(p)).
+
