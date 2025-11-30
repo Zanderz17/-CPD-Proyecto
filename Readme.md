@@ -1,4 +1,4 @@
-# Informe final — KNN paralelo (Zanderz17 / -CPD-Proyecto)
+# KNN paralelo 
 
 
 ## 📌 Resumen ejecutivo
@@ -37,7 +37,6 @@ Este informe resume la paralelización del algoritmo KNN sobre los datasets digi
 |------|-------|
 | Secuencial | `sec/knn_digits_sec.py` |
 | MPI (Digits) | `par/digits/knn_digits_mpi.py` / `knn_digits_mpi_timed.py` |
-| MPI (MNIST) | `par/mnist/knn_mnist_mpi_timed.py` |
 
 **Estrategias MPI probadas:**
 | Variante | Descripción | Uso |
@@ -162,7 +161,7 @@ FLOPs/s ≈ FLOP_total / time_compute
 
 ---
 
-## 9. 🧩 Conclusiones y recomendaciones
+## 9. Conclusiones y recomendaciones
 
 ### ✔ Conclusiones
 - KNN **sí escala**, pero solo hasta cierto p.
