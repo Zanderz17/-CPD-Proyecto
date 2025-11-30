@@ -1,7 +1,7 @@
 # KNN paralelo 
 
 
-## 📌 Resumen ejecutivo
+## 📌 Resumen
 Este informe resume la paralelización del algoritmo KNN sobre los datasets digits y MNIST, la metodología experimental, la derivación teórica de FLOPs, la normalización con datos experimentales, métricas (tiempos totales, cómputo, comunicación), speedup, FLOPs/s y conclusiones.  
 
 **Datos experimentales empleados:** `par/digits/knn_results.csv` (experimentos para N = 200, 500, 1000, 1500, 1797; p variando hasta 80).  
